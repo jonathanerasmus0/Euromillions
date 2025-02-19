@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EuroMillions Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .number-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .number {
+            font-size: 24px;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: gold;
+            border-radius: 50%;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .wheel-container {
+            margin-top: 30px;
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 10px solid #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f8f8;
+            overflow: hidden;
+            margin-top: 50px;
+        }
+        .wheel {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: #ddd;
+            transition: transform 3s ease-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .wheel span {
+            position: absolute;
+            font-size: 18px;
+            font-weight: bold;
+            transform-origin: center center;
+            background-color: gold;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>EuroMillions Number Generator</h1>
+    <button onclick="generateNumbers()">Generate Numbers</button>
+    
+    <div class="wheel-container">
+        <div class="wheel" id="wheel">
+            <!-- Numbers will be dynamically added here -->
+        </div>
+    </div>
+    
+    <div class="number-container hidden" id="numbers"></div>
+
+    <script>
+        function generateNumbers() {
+            // Reset the wheel spin animation by removing and re-adding the class
+            const wheel = document.getElementById('wheel');
+            const numbersContainer = document.getElementById('numbers');
+            const numberContainer = document.querySelector('.number-container');
+            
+            // Reset wheel position before spinning again
+            wheel.style.transition = 'none';  // Disable transition for reset
+            wheel.style.transform = 'rotate(0deg)'; 
+            // Trigger a reflow to ensure the reset is applied immediately
+            void wheel.offsetWidth;
+            // Re-enable the transition for the new spin
+            wheel.style.transition = 'transform 3s ease-out';
+
+            // Spin the wheel
+            wheel.style.transform = 'rotate(3600deg)';  
+
+            // Hide numbers container initially
+            numberContainer.classList.add('hidden');
+
+            // After the spinning animation ends (3 seconds), generate numbers
+            setTimeout(() => {
+                fetch('/generate/')
+                    .then(response => response.json())
+                    .then(data => {
+                        let container = document.getElementById('numbers');
+                        container.innerHTML = "";
+                        data.numbers.forEach(num => {
+                            let span = document.createElement('div');
+                            span.className = 'number';
+                            span.textContent = num;
+                            container.appendChild(span);
+                        });
+                        // Show the numbers after spin
+                        numberContainer.classList.remove('hidden');
+                    });
+            }, 3000); 
+        }
+
+        // Create a wheel with numbers
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+            let angle = 0;
+            let gap = 360 / numbers.length;
+            numbers.forEach(num => {
+                const span = document.createElement('span');
+                span.textContent = num;
+                span.style.transform = `rotate(${angle}deg) translateY(-130px) rotate(${-angle}deg)`; // Increased translateY for spacing
+                wheel.appendChild(span);
+                angle += gap; 
+            });
+        }
+
+        createWheel();
+    </script>
+</body>
+</html>
